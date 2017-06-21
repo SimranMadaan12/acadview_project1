@@ -58,7 +58,7 @@ def read_message():
 # to send a encoded message to your friend from friend list
 def send_message():
   friend_choice = select_friend()
-  print "Index is" + friend_choice
+  print  friend_choice
 
   original_image = raw_input("What is the name of the image?")
   output_path = 'output.jpg'
