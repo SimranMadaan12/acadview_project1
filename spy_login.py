@@ -3,8 +3,12 @@ from spy_detail import Spy, ChatMessage, friend, spy
 # importing library steganography for message encoding
 from steganography.steganography import Steganography
 # default status
-STATUS_MESSAGES = ['My name is Bond, James Bond', 'Shaken, not stirred.', 'Keeping the British end up, Sir']
+from termcolor import *   #import colored file from termcolor module to print colored text
+import colorama         #import colorama file to print the colored text on terminal
+colorama.init()
 
+#default status messages
+STATUS_MESSAGES = ['My name is Bond, James Bond', 'Shaken, not stirred.', 'Keeping the British end up, Sir']
 print "Hello! Let\'s get started"
 
 # to continue with the default user or create their own
@@ -12,7 +16,7 @@ question = "Want to continue as " + " " +spy.salutation+ " " +spy.name + "Y/N?"
 exist = raw_input(question)
 
 
-# function definition for status update, for adding a new status , appending the new status to old list , selecting from old ones
+# function definition for status update, for adding a new status , appending the new status to old list or selecting from old ones
 def add_status():
     updated_status_message = None
     if spy.current_status_message != None:
@@ -47,26 +51,37 @@ def add_status():
 
 # to decode a send message
 def read_message():
-  sender = select_friend()
+    sender = select_friend()
+    print "index = " + str(sender)
 
-  output_path = raw_input("What is the name of the file?")
-  secret_text = Steganography.decode(output_path)
-  new_chat = ChatMessage(secret_text,False)
-  friend[sender].chats.append(new_chat)
-  print "Your secret message is!"+ secret_text
+    output_path = raw_input("What is the name of the file?")
+    secret_text = Steganography.decode(output_path)
+    new_chat = ChatMessage(secret_text,False)
+    friend[sender].chats.append(new_chat)
+    print "Your secret message is!"+ "secret text = "+ secret_text
+    list_of = secret_text.split(" ")
+    for ele in list_of:
+        if ele == "SOS" or ele == "sos" or ele == "SAVE" or ele == "save" or ele == "help" or ele == "HELP":  # If a spy sends a message with special words such as SOS or SAVE ME or HELP ,then display a message and exit the application.
+            print "Spy is in danger!"
+            exit()
 
 # to send a encoded message to your friend from friend list
 def send_message():
   friend_choice = select_friend()
-  print  friend_choice
+  print  "index=" + str(friend_choice)
 
   original_image = raw_input("What is the name of the image?")
   output_path = 'output.jpg'
   text = raw_input("What do you want to say?")
-  Steganography.encode(original_image, output_path, text)
-  new_chat = ChatMessage(text,True)
-  friend[friend_choice].chats.append(new_chat)
-  print"Your Secret message is ready!!!"
+  list_of=text.split(" ")
+  if len(list_of) >= 100:    #to maintain the average number of words(here I assume 100) spoken by a spy everytime you receive a message from a particular spy.
+      print "Message limit exceeded!Please enter text less than 100 words."
+  else:
+      print "your secret message has been ready"
+      Steganography.encode(original_image, output_path, text)  # Using the Steganography library hide the message inside the image
+      new_chat = ChatMessage(text,True)
+      friend[friend_choice].chats.append(new_chat)
+
 
 
 
@@ -114,9 +129,13 @@ def read_chat_history():
 
     for chat in friend[read_for].chats:
         if chat.sent_by_me:
-            print '[%s] %s: %s'%(chat.time.strftime("%d %B %Y"),'You said:',chat.message)
+            cprint("[%s]" % chat.time.strftime("%d %B %Y"), "blue")  # printing chat history using different colors
+            cprint("%s" % "you said:", "red")
+            print "%s" % chat.message
         else:
-            print '[%s} %s said: %s'% (chat.time.strftime("%d %B %Y"),friend[read_for].name,chat.message)
+            cprint("[%s]" % chat.time.strftime("%d %B %Y"), "blue")
+            cprint("%s said:" % friend[read_for].name, "red")
+            print "%s" % chat.message
 
 
 
@@ -144,6 +163,8 @@ def spy_chat(spy):
                     read_chat_history()  # calling of function
                 elif menu_choic == 6:
                     show_menu = False
+                else:
+                    print "The option you choose is not valid. Please enter valid choice!"
     else:
          print 'Sorry you are not of the correct age to be a spy'
 
@@ -164,12 +185,12 @@ elif(exist=="N" or exist=="n"):  # if not a existing user
         spy.age=int(raw_input("Enter your age"))
         spy.rating=float(raw_input("what is your spy rating"))
         spy.is_online = True
-        spy_chat(spy)
+        spy_chat(spy)  # calling start_chat function to start the chat application
      else:
          print "enter valid salutation!!"
 
     else:
-        print 'Please add a valid spy name'
+        print 'Please add a valid spy name'    # if spy press enter without giving any name
 
 else:
     print "invalid choice!!!"
